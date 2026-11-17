@@ -39,6 +39,16 @@ Your ideas are saved to `~/Library/Application Support/Half-Baked/items.json`.
 | Esc | Close thread / go back / hide |
 | ⌘N | New dough (home) |
 
+## Demo mode
+
+For screen recordings (like the launch video made with [demoforge](https://github.com/amoveablefeastym/demoforge)), launch it with a throwaway data folder:
+
+```sh
+build/Half-Baked.app/Contents/MacOS/HalfBaked --demo /tmp/hb-demo
+```
+
+In demo mode, ideas are read from and saved to `<dir>/items.json` instead of your real ones, and settings go to a separate store that is wiped on launch. The panel opens right away at a fixed 1280×800, centered and pinned, with no floating icon or global shortcut. Copy `demo/items.json` into the folder first for a shelf of sample ideas.
+
 ## Credits
 
 Font: [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans), SIL Open Font License (see `Resources/Fonts/OFL.txt`).
