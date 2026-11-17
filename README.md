@@ -41,7 +41,7 @@ Your ideas are saved to `~/Library/Application Support/Half-Baked/items.json`.
 
 ## Demo mode
 
-For screen recordings (like the launch video made with [demoforge](https://github.com/amoveablefeastym/demoforge)), launch it with a throwaway data folder:
+For screen recordings (like the launch video made with [demoday](https://github.com/amoveablefeastym/demoday)), launch it with a throwaway data folder:
 
 ```sh
 build/Half-Baked.app/Contents/MacOS/HalfBaked --demo /tmp/hb-demo
