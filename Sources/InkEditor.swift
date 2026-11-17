@@ -151,6 +151,9 @@ private struct InkRep: NSViewRepresentable {
         tv.isAutomaticTextReplacementEnabled = true
         c.applyFont(font)
         tv.placeholder = placeholder
+        // Visible to VoiceOver and UI automation (the placeholder itself is hand-drawn).
+        tv.setAccessibilityPlaceholderValue(placeholder)
+        if let focusID { tv.setAccessibilityIdentifier(focusID) }
         tv.onSubmit = { [weak c] in c?.parent.onSubmit() }
         tv.onEscape = { [weak c] in c?.parent.onEscape() }
         tv.onResize = { [weak c] in c?.recalc() }
@@ -197,7 +200,10 @@ private struct InkRep: NSViewRepresentable {
         let c = context.coordinator
         c.parent = self
         guard let tv = c.tv else { return }
-        if tv.placeholder != placeholder { tv.placeholder = placeholder }
+        if tv.placeholder != placeholder {
+            tv.placeholder = placeholder
+            tv.setAccessibilityPlaceholderValue(placeholder)
+        }
         let f = font
         if abs((tv.font?.pointSize ?? 0) - f.pointSize) > 0.01 && !tv.hasMarkedText() {
             c.applyFont(f)

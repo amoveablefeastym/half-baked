@@ -6,10 +6,15 @@ APP="build/Half-Baked.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
-echo "Compiling…"
-swiftc -O -swift-version 5 \
-  -target "$(uname -m)-apple-macos14.0" \
-  Sources/*.swift -o "$APP/Contents/MacOS/HalfBaked"
+echo "Compiling (universal: arm64 + x86_64)…"
+BIN=$(mktemp -d)
+for arch in arm64 x86_64; do
+  swiftc -O -swift-version 5 \
+    -target "$arch-apple-macos14.0" \
+    Sources/*.swift -o "$BIN/HalfBaked-$arch"
+done
+lipo -create "$BIN"/HalfBaked-* -output "$APP/Contents/MacOS/HalfBaked"
+rm -rf "$BIN"
 
 mkdir -p "$APP/Contents/Resources/Fonts"
 cp Resources/Fonts/*.ttf "$APP/Contents/Resources/Fonts/"
@@ -39,6 +44,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleVersion</key><string>1</string>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>NSHighResolutionCapable</key><true/>
+  <key>LSUIElement</key><true/>
 </dict></plist>
 PLIST
 
@@ -50,7 +56,6 @@ if [[ "$1" == "install" ]]; then
   mkdir -p ~/Applications
   rm -rf ~/Applications/Half-Baked.app
   cp -R "$APP" ~/Applications/
-  rm -f ~/Desktop/Half-Baked
-  ln -s ~/Applications/Half-Baked.app ~/Desktop/Half-Baked
-  echo "Installed to ~/Applications/Half-Baked.app (shortcut on Desktop)"
+  echo "Installed to ~/Applications/Half-Baked.app"
+  open ~/Applications/Half-Baked.app
 fi

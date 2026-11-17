@@ -1,0 +1,34 @@
+[
+  {
+    "id": "6F1C2B0A-1111-4C6E-9C0B-000000000001",
+    "title": "Sourdough subscription for the neighbors",
+    "created": "2026-11-02T09:12:00Z",
+    "done": false,
+    "entries": [
+      { "id": "6F1C2B0A-1111-4C6E-9C0B-0000000000A1", "text": "Ask 5 neighbors if they'd pay $8/loaf", "kind": "step", "done": true, "created": "2026-11-02T09:13:00Z", "notes": [ { "id": "6F1C2B0A-1111-4C6E-9C0B-0000000000B1", "text": "4 of 5 said yes. Two want rye.", "created": "2026-11-03T18:00:00Z" } ] },
+      { "id": "6F1C2B0A-1111-4C6E-9C0B-0000000000A2", "text": "Check cottage food permit rules", "kind": "step", "done": true, "created": "2026-11-02T09:14:00Z", "notes": [] },
+      { "id": "6F1C2B0A-1111-4C6E-9C0B-0000000000A3", "text": "Bake a test batch of 6", "kind": "step", "done": false, "created": "2026-11-02T09:15:00Z", "notes": [] },
+      { "id": "6F1C2B0A-1111-4C6E-9C0B-0000000000A4", "text": "Saturday pickup from the porch?", "kind": "thought", "done": false, "created": "2026-11-02T09:16:00Z", "notes": [] }
+    ]
+  },
+  {
+    "id": "6F1C2B0A-1111-4C6E-9C0B-000000000002",
+    "title": "A pixel font made from my handwriting",
+    "created": "2026-10-20T20:00:00Z",
+    "done": true,
+    "doneAt": "2026-11-10T21:30:00Z",
+    "entries": [
+      { "id": "6F1C2B0A-1111-4C6E-9C0B-0000000000C1", "text": "Scan 26 letters on grid paper", "kind": "step", "done": true, "created": "2026-10-20T20:01:00Z", "notes": [] },
+      { "id": "6F1C2B0A-1111-4C6E-9C0B-0000000000C2", "text": "Trace in a pixel editor", "kind": "step", "done": true, "created": "2026-10-20T20:02:00Z", "notes": [] }
+    ]
+  },
+  {
+    "id": "6F1C2B0A-1111-4C6E-9C0B-000000000003",
+    "title": "Rooftop tomato co-op",
+    "created": "2026-11-12T07:40:00Z",
+    "done": false,
+    "entries": [
+      { "id": "6F1C2B0A-1111-4C6E-9C0B-0000000000D1", "text": "Is the roof even allowed to hold soil?", "kind": "thought", "done": false, "created": "2026-11-12T07:41:00Z", "notes": [] }
+    ]
+  }
+]

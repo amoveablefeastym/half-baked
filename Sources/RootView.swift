@@ -132,9 +132,11 @@ struct Sidebar: View {
     let justAdded: UUID?
     let ns: Namespace.ID
     @State private var showBaked = false
+    @AppStorage("pinned") private var pinned = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
             Button {
                 selection = nil
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { focus("home") }
@@ -150,6 +152,18 @@ struct Sidebar: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+
+            Button { pinned.toggle() } label: {
+                Image(systemName: pinned ? "pin.fill" : "pin")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(pinned ? Theme.accent : Theme.ink.opacity(0.5))
+                    .frame(width: 36, height: 36)
+                    .glass(4, strong: pinned)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(pinned ? "Unpin — tuck away when I click elsewhere" : "Pin — stay open when I click elsewhere")
+            }
             .padding(.horizontal, 12)
             .padding(.top, 44)
 
@@ -322,7 +336,7 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 14) {
                 InkEditor(text: $draft, placeholder: prompt, fontSize: 30, pixel: true, maxHeight: 220,
                           autofocus: true, focusID: "home",
-                          onSubmit: submit, onEscape: { NSApp.hide(nil) })
+                          onSubmit: submit, onEscape: { NotificationCenter.default.post(name: .hidePanel, object: nil) })
                     .overlay(alignment: .topLeading) {
                         Color.clear.frame(width: 1, height: 38)
                             .matchedGeometryEffect(id: "input", in: ns, anchor: .leading)

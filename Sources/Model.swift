@@ -100,6 +100,7 @@ final class Store: ObservableObject {
     private var loaded = false
 
     private let url: URL = {
+        if let demo = Demo.dataDir { return demo.appendingPathComponent("items.json") }
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Half-Baked", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)

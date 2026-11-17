@@ -231,6 +231,7 @@ struct StepRow: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(step.done ? "Undo step: \(step.text)" : "Complete step: \(step.text)")
             .padding(.top, 3)
 
             if step.done {
