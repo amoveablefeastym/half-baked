@@ -4,6 +4,7 @@ A cozy pixel-art bakery for your half-baked ideas — a native macOS app.
 
 - **Jot it down.** Open the app and type an idea in the middle of the screen; hit Return and it floats onto the shelf to rise.
 - **Give it a counter.** Every idea gets its own workspace: a **Recipe** (steps you tick off) and **Notes**. Click any step or note to open it and add findings, answers or follow-ups.
+- **Sort it onto shelves.** Hit **+** next to Rising to add a shelf (double-click to rename), then drag any dough onto it. Drag it back to the top to take it off, or right-click → Move to Shelf.
 - **Watch it bake.** Each idea's pixel loaf goes from raw dough → rising in a bowl → shaped loaf → golden and steaming as you make progress and mark it baked.
 - **Always within reach.** A little steaming loaf floats on your desktop showing how many ideas are rising. Click it, or press **⌃⌥B** from anywhere, to open the bakery.
 
@@ -26,7 +27,7 @@ Requires macOS 14+ and the Swift toolchain (Xcode or Command Line Tools).
 ./build.sh install   # also copies it to ~/Applications and puts a shortcut on the Desktop
 ```
 
-Your ideas are saved to `~/Library/Application Support/Half-Baked/items.json`.
+Your ideas are saved to `~/Library/Application Support/Half-Baked/items.json` (shelves in `shelves.json` next to it).
 
 ## Keys
 

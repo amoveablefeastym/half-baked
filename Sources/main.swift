@@ -99,7 +99,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         w.backgroundColor = NSColor.dynamic(NSColor(hex: 0xF8EFDF), NSColor(hex: 0x241812))
         w.level = .floating
         w.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        w.isMovableByWindowBackground = true
+        // Not movable by background: that would swallow drags of idea cards onto shelves.
+        // The empty title-bar strip along the top still moves the window.
+        w.isMovableByWindowBackground = false
         w.minSize = NSSize(width: 680, height: 460)
         w.isReleasedWhenClosed = false
         w.delegate = self

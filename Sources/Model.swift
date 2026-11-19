@@ -41,6 +41,26 @@ struct Entry: Identifiable, Codable, Equatable {
     }
 }
 
+/// A named shelf in the sidebar for sorting ideas. Ideas point at their shelf by id.
+struct Shelf: Identifiable, Codable, Equatable {
+    var id = UUID()
+    var name: String
+    var collapsed = false
+    var created = Date()
+
+    init(name: String) { self.name = name }
+
+    private enum CodingKeys: String, CodingKey { case id, name, collapsed, created }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+        collapsed = try c.decodeIfPresent(Bool.self, forKey: .collapsed) ?? false
+        created = try c.decodeIfPresent(Date.self, forKey: .created) ?? Date()
+    }
+}
+
 struct Item: Identifiable, Codable, Equatable {
     var id = UUID()
     var title: String
@@ -48,6 +68,8 @@ struct Item: Identifiable, Codable, Equatable {
     var done = false
     var created = Date()
     var doneAt: Date? = nil
+    /// The shelf this idea sits on; nil means it's loose on the counter.
+    var shelf: UUID? = nil
 
     init(title: String) { self.title = title }
 
@@ -64,7 +86,7 @@ struct Item: Identifiable, Codable, Equatable {
     }
 
     // Tolerant decoding so older saves (which had a `notes` string) still load.
-    private enum CodingKeys: String, CodingKey { case id, title, entries, done, created, doneAt, notes }
+    private enum CodingKeys: String, CodingKey { case id, title, entries, done, created, doneAt, shelf, notes }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -74,6 +96,7 @@ struct Item: Identifiable, Codable, Equatable {
         done = try c.decodeIfPresent(Bool.self, forKey: .done) ?? false
         created = try c.decodeIfPresent(Date.self, forKey: .created) ?? Date()
         doneAt = try c.decodeIfPresent(Date.self, forKey: .doneAt)
+        shelf = try c.decodeIfPresent(UUID.self, forKey: .shelf)
         if entries.isEmpty, let notes = try c.decodeIfPresent(String.self, forKey: .notes),
            !notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             entries = [Entry(text: notes, kind: .thought, created: created)]
@@ -88,6 +111,7 @@ struct Item: Identifiable, Codable, Equatable {
         try c.encode(done, forKey: .done)
         try c.encode(created, forKey: .created)
         try c.encodeIfPresent(doneAt, forKey: .doneAt)
+        try c.encodeIfPresent(shelf, forKey: .shelf)
     }
 }
 
@@ -96,34 +120,54 @@ final class Store: ObservableObject {
     @Published var items: [Item] = [] {
         didSet { if loaded { save() } }
     }
+    /// Kept in their own file so items.json stays readable by older versions.
+    @Published var shelves: [Shelf] = [] {
+        didSet { if loaded { write(shelves, to: shelvesURL) } }
+    }
     @Published var recentlyDeleted: Item?
     private var loaded = false
 
-    private let url: URL = {
-        if let demo = Demo.dataDir { return demo.appendingPathComponent("items.json") }
+    private static let dir: URL = {
+        if let demo = Demo.dataDir { return demo }
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Half-Baked", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("items.json")
+        return dir
     }()
+    private let url = dir.appendingPathComponent("items.json")
+    private let shelvesURL = dir.appendingPathComponent("shelves.json")
 
     init() {
+        let dec = JSONDecoder()
+        dec.dateDecodingStrategy = .iso8601
         if let data = try? Data(contentsOf: url) {
-            let dec = JSONDecoder()
-            dec.dateDecodingStrategy = .iso8601
             items = (try? dec.decode([Item].self, from: data)) ?? []
+        }
+        if let data = try? Data(contentsOf: shelvesURL) {
+            shelves = (try? dec.decode([Shelf].self, from: data)) ?? []
         }
         loaded = true
     }
 
-    private func save() {
+    private func save() { write(items, to: url) }
+
+    private func write<T: Encodable>(_ value: T, to url: URL) {
         let enc = JSONEncoder()
         enc.dateEncodingStrategy = .iso8601
         enc.outputFormatting = [.prettyPrinted, .sortedKeys]
-        if let data = try? enc.encode(items) { try? data.write(to: url, options: .atomic) }
+        if let data = try? enc.encode(value) { try? data.write(to: url, options: .atomic) }
     }
 
     var open: [Item] { items.filter { !$0.done }.sorted { $0.created > $1.created } }
+
+    /// Rising ideas on a shelf, or loose ones (nil). An idea whose shelf is gone counts as loose.
+    func open(on shelf: UUID?) -> [Item] {
+        let known = Set(shelves.map(\.id))
+        return open.filter { item in
+            let s = item.shelf.flatMap { known.contains($0) ? $0 : nil }
+            return s == shelf
+        }
+    }
     var baked: [Item] {
         items.filter(\.done).sorted { ($0.doneAt ?? $0.created) > ($1.doneAt ?? $1.created) }
     }
@@ -155,6 +199,32 @@ final class Store: ObservableObject {
         guard let item = recentlyDeleted else { return }
         items.append(item)
         recentlyDeleted = nil
+    }
+
+    // MARK: Shelves
+
+    @discardableResult
+    func addShelf(_ name: String = "New shelf") -> Shelf {
+        let shelf = Shelf(name: name)
+        shelves.append(shelf)
+        return shelf
+    }
+
+    func updateShelf(_ sid: UUID, _ change: (inout Shelf) -> Void) {
+        guard let i = shelves.firstIndex(where: { $0.id == sid }) else { return }
+        change(&shelves[i])
+    }
+
+    /// Removes the shelf; its ideas go back to being loose, nothing is lost.
+    func deleteShelf(_ sid: UUID) {
+        for i in items.indices where items[i].shelf == sid { items[i].shelf = nil }
+        shelves.removeAll { $0.id == sid }
+    }
+
+    func move(_ id: UUID, to shelf: UUID?) {
+        guard item(id)?.shelf != shelf else { return }
+        update(id) { $0.shelf = shelf }
+        if let shelf { updateShelf(shelf) { $0.collapsed = false } }
     }
 
     func title(_ id: UUID) -> Binding<String> {
